@@ -24,10 +24,19 @@ type CheckoutReport {
   total: Float!
 }
 
+type CartProduct {
+  sku: String!
+  name: String!
+  price: Float!
+  inventory_qty: Int!
+  promo_type: Int!
+  total_item: Int!
+}
 
 type Query{
   products: [Product!]!
   checkout: CheckoutReport!
+  cartSummary: [CartProduct]!
 }
 
 type Mutation{
