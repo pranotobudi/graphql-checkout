@@ -11,6 +11,7 @@ func (pg *PostgresDB) GetAllProducts() ([]*model.Product, error) {
 	query := fmt.Sprintf(`
 		SELECT * FROM products;
 	`)
+	log.Println("query: ", query)
 
 	// execute query
 	rows, err := pg.DB.Query(query)
@@ -32,5 +33,27 @@ func (pg *PostgresDB) GetAllProducts() ([]*model.Product, error) {
 
 	log.Println("Success to execute SQL query, GetAllProducts success: ")
 	return products, nil
+
+}
+
+func (pg *PostgresDB) GetProduct(sku string) (*model.Product, error) {
+	query := fmt.Sprintf(`
+		SELECT * FROM products WHERE sku='%s';
+	`, sku)
+	log.Println("query: ", query)
+
+	// execute query
+	row := pg.DB.QueryRow(query)
+
+	p := model.Product{}
+	err := row.Scan(&p.Sku, &p.Name, &p.Price, &p.InventoryQty, &p.PromoType)
+	if err != nil {
+		log.Println("SQL row scan failed, no row matched: ", err)
+		return nil, err
+	}
+	log.Println("product: ", p)
+
+	log.Println("Success to execute SQL query, GetProduct success: ")
+	return &p, nil
 
 }

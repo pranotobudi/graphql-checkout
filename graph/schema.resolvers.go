@@ -12,7 +12,12 @@ import (
 )
 
 func (r *mutationResolver) AddToCart(ctx context.Context, input model.AddedProduct) (string, error) {
-	result := "Success, Product added to cart"
+	s := store.GetStore()
+	result, err := s.AddToCart(input.Sku, input.Qty)
+	if err != nil {
+		return "", err
+	}
+	// result := "Success, Product added to cart"
 	return result, nil
 	// panic(fmt.Errorf("not implemented"))
 }

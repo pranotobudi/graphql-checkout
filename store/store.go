@@ -35,3 +35,21 @@ func (s *Store) GetProducts() ([]*model.Product, error) {
 	// return all products
 	return products, nil
 }
+
+// Add product to Cart
+func (s *Store) AddToCart(sku string, qty int) (string, error) {
+	// get product from db
+	postgres := database.GetDB()
+	product, err := postgres.GetProduct(sku)
+	if err != nil {
+		return "", err
+	}
+
+	// add to global StoreInstance variable as much as quantity
+	for i := 0; i <= qty; i++ {
+		s.AddedProducts = append(s.AddedProducts, *product)
+	}
+
+	// return success message
+	return "Product successfully added to cart", nil
+}
