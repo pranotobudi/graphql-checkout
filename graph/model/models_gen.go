@@ -17,6 +17,7 @@ type Product struct {
 	Name         string  `json:"name"`
 	Price        float64 `json:"price"`
 	InventoryQty int     `json:"inventory_qty"`
+	PromoType    int     `json:"promo_type"`
 }
 
 type ProductName struct {

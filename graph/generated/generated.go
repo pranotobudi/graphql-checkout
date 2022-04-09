@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 		InventoryQty func(childComplexity int) int
 		Name         func(childComplexity int) int
 		Price        func(childComplexity int) int
+		PromoType    func(childComplexity int) int
 		Sku          func(childComplexity int) int
 	}
 
@@ -138,6 +139,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Product.Price(childComplexity), true
+
+	case "Product.promo_type":
+		if e.complexity.Product.PromoType == nil {
+			break
+		}
+
+		return e.complexity.Product.PromoType(childComplexity), true
 
 	case "Product.sku":
 		if e.complexity.Product.Sku == nil {
@@ -245,6 +253,7 @@ type Product {
   name: String!
   price: Float!
   inventory_qty: Int!
+  promo_type: Int!
 }
 
 type ProductName {
@@ -575,6 +584,41 @@ func (ec *executionContext) _Product_inventory_qty(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InventoryQty, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Product_promo_type(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Product",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PromoType, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2116,6 +2160,16 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 		case "inventory_qty":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Product_inventory_qty(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "promo_type":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Product_promo_type(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)

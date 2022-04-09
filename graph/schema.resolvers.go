@@ -8,6 +8,7 @@ import (
 
 	"github.com/pranotobudi/graphql-checkout/graph/generated"
 	"github.com/pranotobudi/graphql-checkout/graph/model"
+	"github.com/pranotobudi/graphql-checkout/store"
 )
 
 func (r *mutationResolver) AddToCart(ctx context.Context, input model.AddedProduct) (string, error) {
@@ -17,17 +18,12 @@ func (r *mutationResolver) AddToCart(ctx context.Context, input model.AddedProdu
 }
 
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
-	var products []*model.Product
-	dummyProduct := model.Product{
-		Sku:          "ABC",
-		Name:         "Product 1",
-		Price:        30.00,
-		InventoryQty: 10,
+	s := store.GetStore()
+	products, err := s.GetProducts()
+	if err != nil {
+		return nil, err
 	}
-	products = append(products, &dummyProduct)
-
 	return products, nil
-	// panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Checkout(ctx context.Context) (*model.CheckoutReport, error) {
