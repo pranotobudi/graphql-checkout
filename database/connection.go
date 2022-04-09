@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -17,46 +18,45 @@ type PostgresDB struct {
 	DB *sql.DB
 }
 
-func InitDB() *PostgresDB {
-	dbConfig := config.DbConfig()
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=%s",
-		dbConfig.Host, dbConfig.Port, dbConfig.Username, dbConfig.Password, dbConfig.DbName, dbConfig.SSLMode)
+var PostgresDBInstance *PostgresDB
+var once sync.Once
 
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Println("Fail to connect to Postgres!")
-		return nil
-		// panic(err)
-	}
-	// defer db.Close()
+func GetDB() *PostgresDB {
+	once.Do(func() {
+		dbConfig := config.DbConfig()
+		psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
+			"password=%s dbname=%s sslmode=%s",
+			dbConfig.Host, dbConfig.Port, dbConfig.Username, dbConfig.Password, dbConfig.DbName, dbConfig.SSLMode)
 
-	// err = db.Ping()
-	// if err != nil {
-	// 	log.Println("Fail to connect to Postgres!")
-	// 	return nil
-	// 	// panic(err)
-	// }
-
-	// retry connection
-	retryCount := 30
-	for {
-		err := db.Ping()
+		db, err := sql.Open("postgres", psqlInfo)
 		if err != nil {
-			if retryCount == 0 {
-				log.Fatalf("Not able to establish connection to database")
-			}
-
-			log.Println(fmt.Sprintf("Could not connect to database. Wait 5 seconds. %d retries left...", retryCount))
-			retryCount--
-			time.Sleep(5 * time.Second)
-		} else {
-			break
+			log.Println("Fail to setup Postgres connection!")
+			return
+			// return nil
+			// panic(err)
 		}
-	}
+		// retry connection
+		retryCount := 30
+		for {
+			err := db.Ping()
+			if err != nil {
+				if retryCount == 0 {
+					log.Fatalf("Not able to establish connection to database")
+				}
+
+				log.Println(fmt.Sprintf("Could not connect to database. Wait 5 seconds. %d retries left...", retryCount))
+				retryCount--
+				time.Sleep(5 * time.Second)
+			} else {
+				break
+			}
+		}
+
+		PostgresDBInstance = &PostgresDB{DB: db}
+	})
 
 	log.Println("Successfully connected to Postgres!")
-	return &PostgresDB{DB: db}
+	return PostgresDBInstance
 }
 
 func (pg *PostgresDB) MigrateDB(sqlFile string) error {

@@ -12,6 +12,7 @@ type Product {
   name: String!
   price: Float!
   inventory_qty: Int!
+  promo_type: Int!
 }
 
 type ProductName {

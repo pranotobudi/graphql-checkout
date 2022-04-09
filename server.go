@@ -27,7 +27,7 @@ func main() {
 		}
 	}
 	log.Println("bismillah")
-	postgres := database.InitDB()
+	postgres := database.GetDB()
 	postgres.MigrateDB("./database/init.sql")
 
 	router := chi.NewRouter()
