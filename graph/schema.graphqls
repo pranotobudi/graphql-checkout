@@ -2,27 +2,32 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+input AddedProduct {
+  sku: String!
+  qty: Int!
 }
 
-type User {
-  id: ID!
+type Product {
+  sku: String!
+  name: String!
+  price: Float!
+  inventory_qty: Int!
+}
+
+type ProductName {
   name: String!
 }
 
-type Query {
-  todos: [Todo!]!
+type CheckoutReport {
+  items: [ProductName!]!
+  total: Float!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+type Query{
+  products: [Product!]!
+  checkout: CheckoutReport!
 }
 
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
+type Mutation{
+  addToCart(input: AddedProduct!): String!
 }
