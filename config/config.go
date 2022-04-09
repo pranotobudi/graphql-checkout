@@ -11,10 +11,6 @@ type DbConnection struct {
 	SSLMode  string
 }
 
-type ESDbConnection struct {
-	IndexName string
-}
-
 func DbConfig() DbConnection {
 	dbConfig := DbConnection{
 		Host:     os.Getenv("DB_HOST"),
@@ -26,13 +22,6 @@ func DbConfig() DbConnection {
 	}
 
 	return dbConfig
-}
-func ESDbConfig() ESDbConnection {
-	esDbConfig := ESDbConnection{
-		IndexName: os.Getenv("ES_INDEX_NAME"),
-	}
-
-	return esDbConfig
 }
 
 type AppEnvironment struct {
@@ -47,13 +36,10 @@ type AppEnvironment struct {
 
 func AppConfig() AppEnvironment {
 	appConfig := AppEnvironment{
-		AppHost:             os.Getenv("APP_HOST"),
-		Port:                os.Getenv("PORT"),
-		AppEnv:              os.Getenv("APP_ENV"),
-		JWTSecret:           os.Getenv("JWT_SECRET_KEY"),
-		CloudinaryApiKey:    os.Getenv("CLOUDINARY_API_KEY"),
-		CloudinaryApiSecret: os.Getenv("CLOUDINARY_API_SECRET"),
-		CloudinaryCloudName: os.Getenv("CLOUDINARY_CLOUD_NAME"),
+		AppHost:   os.Getenv("APP_HOST"),
+		Port:      os.Getenv("PORT"),
+		AppEnv:    os.Getenv("APP_ENV"),
+		JWTSecret: os.Getenv("JWT_SECRET_KEY"),
 	}
 
 	return appConfig
