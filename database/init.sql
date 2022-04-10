@@ -38,7 +38,7 @@ INSERT INTO products
 VALUES
   ('120P90', 'Google Home', 49.99, 10, 2), 
   ('43N23P', 'MacBook Pro', 5399.99, 5, 1), 
-  ('A304SD', 'Alexa Speaker', 109.99, 10, 3), 
+  ('A304SD', 'Alexa Speaker', 109.50, 10, 3), 
   ('234234', 'Rasberry Pi B', 30.00, 2, 0);
 
 INSERT INTO promo_type_1

@@ -36,15 +36,12 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 
 func (r *queryResolver) Checkout(ctx context.Context) (*model.CheckoutReport, error) {
 	log.Println("Checkout Resolver")
-	productName1 := model.ProductName{
-		Name: "Product1",
+	s := store.GetStore()
+	checkoutReport, err := s.GetCheckout()
+	if err != nil {
+		return nil, err
 	}
-	dummyCheckoutReport := model.CheckoutReport{
-		Items: []*model.ProductName{&productName1},
-		Total: 3000.99,
-	}
-	return &dummyCheckoutReport, nil
-	// panic(fmt.Errorf("not implemented"))
+	return checkoutReport, nil
 }
 
 func (r *queryResolver) CartSummary(ctx context.Context) ([]*model.CartProduct, error) {
