@@ -27,7 +27,7 @@ About This App:
 _Mutation_
 ```
 mutation {
-  addToCart(input: {sku: "43N23P", qty: 1})
+  addToCart(added_product: {user_id:"01", sku: "43N23P", qty: 1})
 }
 
 ```
@@ -46,9 +46,8 @@ _Response (200)_
 _Mutation_
 ```
 mutation {
-  addToCart(input: {sku: "43N23P", qty: 100})
+  addToCart(added_product: {user_id:"01", sku: "43N23P", qty: 100})
 }
-
 ```
 
 _Response_
@@ -71,7 +70,7 @@ _Response_
 _Query_
 ```
 query {
-	checkout {
+	checkout(user_id: "01", cur: "USD") {
         items {
             name
         }
