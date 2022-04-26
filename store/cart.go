@@ -129,9 +129,8 @@ func (s *Cart) FindCartSummarySkuIdx(sku string) int {
 	return -1
 }
 
-
 // Get all products from database
-func (s *Cart) GetCheckout() (*model.CheckoutReport, error) {
+func (s *Cart) GetCheckout(cur string) (*model.CheckoutReport, error) {
 	log.Println("GetCheckout")
 	// clear CheckoutReport - fresh CheckoutReport for current transaction
 	s.CheckoutReport = model.CheckoutReport{
@@ -163,7 +162,7 @@ func (s *Cart) GetCheckout() (*model.CheckoutReport, error) {
 	s.BonusProducts = []model.Product{}
 
 	// checkout formatting
-	s.CheckoutReportFormatting()
+	s.CheckoutReportFormatting(cur)
 	// return report
 	return &s.CheckoutReport, nil
 }
@@ -180,6 +179,10 @@ func (s *Cart) CountProductPrice(cartProduct model.CartProduct) error {
 		s.ProcessPromoType2(cartProduct)
 	case 3:
 		s.ProcessPromoType3(cartProduct)
+	case 4:
+		s.ProcessPromoType4(cartProduct)
+	case 5:
+		s.ProcessPromoType5(cartProduct)
 	}
 	return nil
 }
@@ -247,11 +250,16 @@ func (s *Cart) ProcessPromoType1(cartProduct model.CartProduct) error {
 func (s *Cart) ProcessPromoType2(cartProduct model.CartProduct) error {
 	log.Println("ProcessPromoType2")
 	// count price
-	discountPrice := float64(cartProduct.TotalItem)*cartProduct.Product.Price - float64(cartProduct.TotalItem/2)*cartProduct.Product.Price
-	log.Println("ProcessPromoType2 discountPrice: ", discountPrice)
+	var price float64
+	if cartProduct.TotalItem >= 3 {
+		price = float64(cartProduct.TotalItem)*cartProduct.Product.Price - float64(int(cartProduct.TotalItem/3))*cartProduct.Product.Price
+		log.Println("ProcessPromoType2 discountPrice: ", price)
 
+	} else {
+		price = float64(cartProduct.TotalItem) * cartProduct.Product.Price
+	}
 	// add to CheckoutReport
-	s.CheckoutReport.Total += math.Round(discountPrice*100) / 100 //it will round it to 2 digit decimal
+	s.CheckoutReport.Total += math.Round(price*100) / 100 //it will round it to 2 digit decimal
 	productName := model.ProductName{
 		Name: cartProduct.Product.Name,
 	}
@@ -279,6 +287,76 @@ func (s *Cart) ProcessPromoType3(cartProduct model.CartProduct) error {
 
 	// add to CheckoutReport
 	s.CheckoutReport.Total += math.Round(discountPrice*100) / 100 //it will round it to 2 digit decimal
+	productName := model.ProductName{
+		Name: cartProduct.Product.Name,
+	}
+	for i := 0; i < cartProduct.TotalItem; i++ {
+		s.CheckoutReport.Items = append(s.CheckoutReport.Items, &productName)
+	}
+
+	return nil
+}
+
+// ProcessPromoType4: Process product with this rule:
+// Each sale of MacBook Pro will be discounted flat $200
+func (s *Cart) ProcessPromoType4(cartProduct model.CartProduct) error {
+	log.Println("ProcessPromoType4")
+	// count price
+	var discountPrice float64
+	log.Println("cartProduct", cartProduct)
+	discountPrice = cartProduct.Product.Price - 200
+
+	log.Println("ProcessPromoType4 discountPrice: ", discountPrice)
+
+	// add to CheckoutReport
+	s.CheckoutReport.Total += math.Round(discountPrice*100) / 100 //it will round it to 2 digit decimal
+	productName := model.ProductName{
+		Name: cartProduct.Product.Name,
+	}
+	for i := 0; i < cartProduct.TotalItem; i++ {
+		s.CheckoutReport.Items = append(s.CheckoutReport.Items, &productName)
+	}
+
+	return nil
+}
+
+// ProcessPromoType5: Process product with this rule:
+// Each purchase of 2 MacBook, the customer will get free one item on the cart that
+// is less than $50, if there are two items that are below $50, the customer will get
+// free of one the biggest of two
+func (s *Cart) ProcessPromoType5(cartProduct model.CartProduct) error {
+	log.Println("ProcessPromoType5")
+	// find items < $50
+	lessFiftyProduct := []model.Product{}
+	for _, item := range s.AddedProducts {
+		if item.Price < 50 {
+			lessFiftyProduct = append(lessFiftyProduct, item)
+		}
+	}
+	// find the biggest price & add as bonus
+	if len(lessFiftyProduct) > 0 {
+		maxIdx := 0
+		for i, item := range lessFiftyProduct {
+			if item.Price > lessFiftyProduct[maxIdx].Price {
+				maxIdx = i
+			}
+		}
+		// add as bonus
+		totalBonus := int(cartProduct.TotalItem / 2)
+		for i := 0; i < totalBonus; i++ {
+			s.BonusProducts = append(s.BonusProducts, lessFiftyProduct[maxIdx])
+		}
+	}
+
+	// count price
+	var price float64
+	log.Println("cartProduct", cartProduct)
+	price = cartProduct.Product.Price * float64(cartProduct.TotalItem)
+
+	log.Println("ProcessPromoType3 discountPrice: ", price)
+
+	// add to CheckoutReport
+	s.CheckoutReport.Total += math.Round(price*100) / 100 //it will round it to 2 digit decimal
 	productName := model.ProductName{
 		Name: cartProduct.Product.Name,
 	}
@@ -322,7 +400,9 @@ func (s *Cart) AdjustToBonusProduct() error {
 }
 
 // CheckoutReportFormatting will format Total as 2 digit decimal
-func (s *Cart) CheckoutReportFormatting() error {
+func (s *Cart) CheckoutReportFormatting(cur string) error {
+
 	s.CheckoutReport.Total = math.Round(s.CheckoutReport.Total*100) / 100
+
 	return nil
 }

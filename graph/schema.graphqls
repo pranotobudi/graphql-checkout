@@ -32,7 +32,7 @@ type CartProduct {
 
 type Query{
   products: [Product!]!
-  checkout(user_id: String!): CheckoutReport!
+  checkout(user_id: String!, cur: String!): CheckoutReport!
   cartSummary(user_id: String!): [CartProduct]!
 }
 

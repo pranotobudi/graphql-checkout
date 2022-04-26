@@ -14,6 +14,13 @@ import (
 
 func (r *mutationResolver) AddToCart(ctx context.Context, addedProduct model.AddedProduct) (string, error) {
 	log.Println("AddToCart Resolver")
+	// check cart availability
+	_, found := store.GetStore().Carts[addedProduct.UserID]
+	if !found {
+		log.Println("AddToCart Resolver NewCart")
+		store.GetStore().Carts[addedProduct.UserID] = store.NewCart(addedProduct.UserID)
+	}
+
 	cart := store.GetStore().Carts[addedProduct.UserID]
 	result, err := cart.AddToCart(addedProduct.Sku, addedProduct.Qty)
 	if err != nil {
@@ -34,10 +41,11 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 	return products, nil
 }
 
-func (r *queryResolver) Checkout(ctx context.Context, userID string) (*model.CheckoutReport, error) {
+func (r *queryResolver) Checkout(ctx context.Context, userID string, cur string) (*model.CheckoutReport, error) {
 	log.Println("Checkout Resolver")
 	cart := store.GetStore().Carts[userID]
-	checkoutReport, err := cart.GetCheckout()
+	log.Println("Cart: ", cart, "ID: ", userID)
+	checkoutReport, err := cart.GetCheckout(cur)
 	if err != nil {
 		return nil, err
 	}

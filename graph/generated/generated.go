@@ -71,7 +71,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		CartSummary func(childComplexity int, userID string) int
-		Checkout    func(childComplexity int, userID string) int
+		Checkout    func(childComplexity int, userID string, cur string) int
 		Products    func(childComplexity int) int
 	}
 }
@@ -81,7 +81,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Products(ctx context.Context) ([]*model.Product, error)
-	Checkout(ctx context.Context, userID string) (*model.CheckoutReport, error)
+	Checkout(ctx context.Context, userID string, cur string) (*model.CheckoutReport, error)
 	CartSummary(ctx context.Context, userID string) ([]*model.CartProduct, error)
 }
 
@@ -204,7 +204,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Checkout(childComplexity, args["user_id"].(string)), true
+		return e.complexity.Query.Checkout(childComplexity, args["user_id"].(string), args["cur"].(string)), true
 
 	case "Query.products":
 		if e.complexity.Query.Products == nil {
@@ -311,7 +311,7 @@ type CartProduct {
 
 type Query{
   products: [Product!]!
-  checkout(user_id: String!): CheckoutReport!
+  checkout(user_id: String!, cur: String!): CheckoutReport!
   cartSummary(user_id: String!): [CartProduct]!
 }
 
@@ -382,6 +382,15 @@ func (ec *executionContext) field_Query_checkout_args(ctx context.Context, rawAr
 		}
 	}
 	args["user_id"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["cur"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cur"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["cur"] = arg1
 	return args, nil
 }
 
@@ -875,7 +884,7 @@ func (ec *executionContext) _Query_checkout(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Checkout(rctx, args["user_id"].(string))
+		return ec.resolvers.Query().Checkout(rctx, args["user_id"].(string), args["cur"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -8,7 +8,7 @@ import (
 )
 
 type Store struct {
-	Carts map[string]Cart
+	Carts map[string]*Cart
 }
 
 var StoreInstance *Store
@@ -17,7 +17,7 @@ var once sync.Once
 func GetStore() *Store {
 	once.Do(func() {
 		StoreInstance = &Store{
-			Carts: make(map[string]Cart),
+			Carts: make(map[string]*Cart),
 		}
 	})
 
@@ -25,7 +25,7 @@ func GetStore() *Store {
 }
 
 func (s *Store) addCart(userID string) {
-	s.Carts[userID] = *NewCart(userID)
+	s.Carts[userID] = NewCart(userID)
 }
 
 func (s *Store) removeCart(userID string) {
