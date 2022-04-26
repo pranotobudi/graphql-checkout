@@ -3,6 +3,7 @@
 # https://gqlgen.com/getting-started/
 
 input AddedProduct {
+  user_id: String!
   sku: String!
   qty: Int!
 }
@@ -25,20 +26,16 @@ type CheckoutReport {
 }
 
 type CartProduct {
-  sku: String!
-  name: String!
-  price: Float!
-  inventory_qty: Int!
-  promo_type: Int!
+  product: Product!
   total_item: Int!
 }
 
 type Query{
   products: [Product!]!
-  checkout: CheckoutReport!
-  cartSummary: [CartProduct]!
+  checkout(user_id: String!): CheckoutReport!
+  cartSummary(user_id: String!): [CartProduct]!
 }
 
 type Mutation{
-  addToCart(input: AddedProduct!): String!
+  addToCart(added_product: AddedProduct!): String!
 }

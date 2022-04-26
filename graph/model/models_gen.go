@@ -3,17 +3,14 @@
 package model
 
 type AddedProduct struct {
-	Sku string `json:"sku"`
-	Qty int    `json:"qty"`
+	UserID string `json:"user_id"`
+	Sku    string `json:"sku"`
+	Qty    int    `json:"qty"`
 }
 
 type CartProduct struct {
-	Sku          string  `json:"sku"`
-	Name         string  `json:"name"`
-	Price        float64 `json:"price"`
-	InventoryQty int     `json:"inventory_qty"`
-	PromoType    int     `json:"promo_type"`
-	TotalItem    int     `json:"total_item"`
+	Product   *Product `json:"product"`
+	TotalItem int      `json:"total_item"`
 }
 
 type CheckoutReport struct {

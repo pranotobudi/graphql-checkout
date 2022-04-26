@@ -12,10 +12,10 @@ import (
 	"github.com/pranotobudi/graphql-checkout/store"
 )
 
-func (r *mutationResolver) AddToCart(ctx context.Context, input model.AddedProduct) (string, error) {
+func (r *mutationResolver) AddToCart(ctx context.Context, addedProduct model.AddedProduct) (string, error) {
 	log.Println("AddToCart Resolver")
-	s := store.GetStore()
-	result, err := s.AddToCart(input.Sku, input.Qty)
+	cart := store.GetStore().Carts[addedProduct.UserID]
+	result, err := cart.AddToCart(addedProduct.Sku, addedProduct.Qty)
 	if err != nil {
 		return "", err
 	}
@@ -34,20 +34,20 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 	return products, nil
 }
 
-func (r *queryResolver) Checkout(ctx context.Context) (*model.CheckoutReport, error) {
+func (r *queryResolver) Checkout(ctx context.Context, userID string) (*model.CheckoutReport, error) {
 	log.Println("Checkout Resolver")
-	s := store.GetStore()
-	checkoutReport, err := s.GetCheckout()
+	cart := store.GetStore().Carts[userID]
+	checkoutReport, err := cart.GetCheckout()
 	if err != nil {
 		return nil, err
 	}
 	return checkoutReport, nil
 }
 
-func (r *queryResolver) CartSummary(ctx context.Context) ([]*model.CartProduct, error) {
+func (r *queryResolver) CartSummary(ctx context.Context, userID string) ([]*model.CartProduct, error) {
 	log.Println("CartSummary Resolver")
-	s := store.GetStore()
-	cartSummary, err := s.GetCartSummary()
+	cart := store.GetStore().Carts[userID]
+	cartSummary, err := cart.GetCartSummary()
 	if err != nil {
 		return nil, err
 	}
