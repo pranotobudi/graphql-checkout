@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 
+	"github.com/asvvvad/exchange"
 	"github.com/pranotobudi/graphql-checkout/database"
 	"github.com/pranotobudi/graphql-checkout/graph/model"
 )
@@ -401,7 +402,16 @@ func (s *Cart) AdjustToBonusProduct() error {
 
 // CheckoutReportFormatting will format Total as 2 digit decimal
 func (s *Cart) CheckoutReportFormatting(cur string) error {
+	if cur == "IDR" {
+		// covert from $ to IDR
+		ex := exchange.New("USD")
+		bigFloatConvTimes100, _ := ex.ConvertTo("IDR", int(s.CheckoutReport.Total*100))
+		float64ConvTimes100, _ := bigFloatConvTimes100.Float64()
+		conv := float64ConvTimes100 / float64(100)
+		fmt.Printf("Total:%d conv:%.2f", int(s.CheckoutReport.Total), conv)
 
+		s.CheckoutReport.Total = conv
+	}
 	s.CheckoutReport.Total = math.Round(s.CheckoutReport.Total*100) / 100
 
 	return nil
