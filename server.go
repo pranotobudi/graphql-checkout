@@ -13,6 +13,7 @@ import (
 	"github.com/pranotobudi/graphql-checkout/database"
 	"github.com/pranotobudi/graphql-checkout/graph"
 	"github.com/pranotobudi/graphql-checkout/graph/generated"
+	"github.com/pranotobudi/graphql-checkout/store"
 )
 
 func main() {
@@ -32,8 +33,10 @@ func main() {
 
 	router := chi.NewRouter()
 	// router.Use(auth.Middleware())
-
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	storeObject := store.NewStore()
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
+		StoreService: *store.NewStoreService(*storeObject, postgres),
+	}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	router.Handle("/graphql", srv)

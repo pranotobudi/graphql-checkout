@@ -9,20 +9,13 @@ import (
 
 	"github.com/pranotobudi/graphql-checkout/graph/generated"
 	"github.com/pranotobudi/graphql-checkout/graph/model"
-	"github.com/pranotobudi/graphql-checkout/store"
 )
 
 func (r *mutationResolver) AddToCart(ctx context.Context, addedProduct model.AddedProduct) (string, error) {
 	log.Println("AddToCart Resolver")
-	// check cart availability
-	_, found := store.GetStore().Carts[addedProduct.UserID]
-	if !found {
-		log.Println("AddToCart Resolver NewCart")
-		store.GetStore().Carts[addedProduct.UserID] = store.NewCart(addedProduct.UserID)
-	}
 
-	cart := store.GetStore().Carts[addedProduct.UserID]
-	result, err := cart.AddToCart(addedProduct.Sku, addedProduct.Qty)
+	// cart := r.StoreGetter.GetStore().Carts[addedProduct.UserID]
+	result, err := r.StoreService.AddToCart(addedProduct.UserID, addedProduct.Sku, addedProduct.Qty)
 	if err != nil {
 		return "", err
 	}
@@ -33,8 +26,7 @@ func (r *mutationResolver) AddToCart(ctx context.Context, addedProduct model.Add
 
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
 	log.Println("Products Resolver")
-	s := store.GetStore()
-	products, err := s.GetProducts()
+	products, err := r.StoreService.GetProducts()
 	if err != nil {
 		return nil, err
 	}
@@ -42,10 +34,9 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Checkout(ctx context.Context, userID string, cur string) (*model.CheckoutReport, error) {
+
 	log.Println("Checkout Resolver")
-	cart := store.GetStore().Carts[userID]
-	log.Println("Cart: ", cart, "ID: ", userID)
-	checkoutReport, err := cart.GetCheckout(cur)
+	checkoutReport, err := r.StoreService.GetCheckout(userID, cur)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +45,8 @@ func (r *queryResolver) Checkout(ctx context.Context, userID string, cur string)
 
 func (r *queryResolver) CartSummary(ctx context.Context, userID string) ([]*model.CartProduct, error) {
 	log.Println("CartSummary Resolver")
-	cart := store.GetStore().Carts[userID]
-	cartSummary, err := cart.GetCartSummary()
+	cartSummary, err := r.StoreService.GetCartSummary(userID)
+
 	if err != nil {
 		return nil, err
 	}
