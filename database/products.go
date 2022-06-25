@@ -63,7 +63,7 @@ type PromoType1 struct {
 	PromoSku   string `json:"promo_sku"`
 }
 
-func (pg *PostgresDB) GetPromoType1(sku string) (*PromoType1, error) {
+func (pg *PostgresDB) GetPromoType1(sku string) (*model.Product, error) {
 	query := fmt.Sprintf(`
 		SELECT * FROM promo_type_1 WHERE product_sku='%s';
 	`, sku)
@@ -79,7 +79,7 @@ func (pg *PostgresDB) GetPromoType1(sku string) (*PromoType1, error) {
 		return nil, err
 	}
 	log.Println("product: ", p)
-
 	log.Println("Success to execute SQL query, GetPromoType1 success")
-	return &p, nil
+	// return &p, nil
+	return pg.GetProduct(p.PromoSku)
 }

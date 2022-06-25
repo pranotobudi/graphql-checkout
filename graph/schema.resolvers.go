@@ -34,23 +34,12 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Checkout(ctx context.Context, userID string, cur string) (*model.CheckoutReport, error) {
-
 	log.Println("Checkout Resolver")
-	checkoutReport, err := r.StoreService.GetCheckout(userID, cur)
+	checkoutReport, err := r.StoreService.Store.Carts[userID].GetCheckout(cur, r.StoreService.Repo)
 	if err != nil {
 		return nil, err
 	}
 	return checkoutReport, nil
-}
-
-func (r *queryResolver) CartSummary(ctx context.Context, userID string) ([]*model.CartProduct, error) {
-	log.Println("CartSummary Resolver")
-	cartSummary, err := r.StoreService.GetCartSummary(userID)
-
-	if err != nil {
-		return nil, err
-	}
-	return cartSummary, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

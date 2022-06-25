@@ -23,20 +23,10 @@ func (p *MockedPostgres) GetProduct(sku string) (*model.Product, error) {
 	args := p.Called()
 	return args.Get(0).(*model.Product), args.Error(1)
 }
-
-// type MockedStore struct {
-// 	mock.Mock
-// }
-
-// func (s *MockedStore) GetStore() *store.Store {
-// 	args := s.Called()
-// 	return args.Get(0).(*store.Store)
-// }
-
-// func (s *MockedStore) AddToCart(sku string, qty int) (string, error) {
-// 	args := s.Called()
-// 	return args.String(0), args.Error(1)
-// }
+func (p *MockedPostgres) GetPromoType1(sku string) (*model.Product, error) {
+	args := p.Called()
+	return args.Get(0).(*model.Product), args.Error(1)
+}
 func TestAddToCart(t *testing.T) {
 
 	tt := []struct {
@@ -71,7 +61,6 @@ func TestAddToCart(t *testing.T) {
 			}
 			mockedPostgres.On("GetProduct", mock.Anything).Return(&product1, nil)
 			storeService := store.NewStoreService(testStore, mockedPostgres)
-			// mockedCartAdder.On("AddToCart", mock.Anything).Return("Success", nil)
 
 			resolvers := graph.Resolver{
 				StoreService: *storeService,
@@ -87,8 +76,8 @@ func TestAddToCart(t *testing.T) {
 			var expectedResponse map[string]interface{}
 			c.MustPost(query, &expectedResponse)
 
-			assert.Equal(t, "43N23P", storeService.Store.Carts["01"].AddedProducts[0].Sku)
-			assert.Equal(t, 10, storeService.Store.Carts["01"].AddedProducts[0].InventoryQty)
+			assert.Equal(t, "43N23P", storeService.Store.Carts["01"].CartProducts["43N23P"].Product.Sku)
+			assert.Equal(t, 10, storeService.Store.Carts["01"].CartProducts["43N23P"].Product.InventoryQty)
 		})
 	}
 }
