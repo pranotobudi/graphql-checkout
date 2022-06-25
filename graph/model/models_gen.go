@@ -9,13 +9,14 @@ type AddedProduct struct {
 }
 
 type CartProduct struct {
-	Product   *Product `json:"product"`
-	TotalItem int      `json:"total_item"`
+	Product              *Product `json:"product"`
+	TotalItem            int      `json:"total_item"`
+	TotalPricePerProduct float64  `json:"total_price_per_product"`
 }
 
 type CheckoutReport struct {
-	Items []*ProductName `json:"items"`
-	Total float64        `json:"total"`
+	Items      []string `json:"items"`
+	TotalPrice float64  `json:"total_price"`
 }
 
 type Product struct {
@@ -24,8 +25,4 @@ type Product struct {
 	Price        float64 `json:"price"`
 	InventoryQty int     `json:"inventory_qty"`
 	PromoType    int     `json:"promo_type"`
-}
-
-type ProductName struct {
-	Name string `json:"name"`
 }

@@ -16,24 +16,20 @@ type Product {
   promo_type: Int!
 }
 
-type ProductName {
-  name: String!
-}
-
 type CheckoutReport {
-  items: [ProductName!]!
-  total: Float!
+  items: [String!]!
+  total_price: Float!
 }
 
 type CartProduct {
   product: Product!
   total_item: Int!
+  total_price_per_product: Float!
 }
 
 type Query{
   products: [Product!]!
   checkout(user_id: String!, cur: String!): CheckoutReport!
-  cartSummary(user_id: String!): [CartProduct]!
 }
 
 type Mutation{

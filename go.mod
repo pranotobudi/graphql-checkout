@@ -9,7 +9,6 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.6
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/stretchr/testify v1.7.4
 	github.com/vektah/gqlparser/v2 v2.4.5
 )
